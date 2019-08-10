@@ -12,10 +12,17 @@ class Observer:
     """Class containing data about an observer in 3D space"""
 
     origin: Vector3
-    perspective: Vector3
+    orientation: Vector3
 
     focal: float
     window: base.Point
+
+@dataclass
+class Controller:
+    """Class containing data about the controls of the Projection"""
+
+    panSpeed: float
+    rotateSpeed: float
 
 class Projection(base.Model):
     """Represents a 3 dimensional space projected into 2D based on an observer"""
@@ -50,32 +57,42 @@ class Projection(base.Model):
             end = end - self.observer.origin
 
             # Rotate each vector point
-            start.rotate_x(self.observer.perspective.x)
-            start.rotate_y(self.observer.perspective.y)
-            start.rotate_z(self.observer.perspective.z)
+            start.rotate_x_ip(self.observer.orientation.x)
+            start.rotate_y_ip(self.observer.orientation.y)
+            start.rotate_z_ip(self.observer.orientation.z)
 
-            end.rotate_x(self.observer.perspective.x)
-            end.rotate_y(self.observer.perspective.y)
-            end.rotate_z(self.observer.perspective.z)
+            end.rotate_x_ip(self.observer.orientation.x)
+            end.rotate_y_ip(self.observer.orientation.y)
+            end.rotate_z_ip(self.observer.orientation.z)
 
-            # Project each point onto the 2D focal plane
-            start = pygame.Vector2(
-                self.observer.focal/start.z * start.x,
-                self.observer.focal/start.z * start.y
-            )
-            end = pygame.Vector2(
-                self.observer.focal/end.z * end.x,
-                self.observer.focal/end.z * end.y
-            )
+            # Dont draw lines behind focal?
+            if start.z > self.observer.focal and end.z > self.observer.focal:
 
-            # Draw the projected line onto the 2D output
-            output.draw_line(start, end)
+                # Project each point onto the 2D focal plane
+                start = pygame.Vector2(
+                    self.observer.focal/start.z * start.x,
+                    self.observer.focal/start.z * start.y
+                )
+                end = pygame.Vector2(
+                    self.observer.focal/end.z * end.x,
+                    self.observer.focal/end.z * end.y
+                )
+
+                # Draw the projected line onto the 2D output
+                output.draw_line(start, end)
 
         # Return the finished output
         return output
 
 class ProjectionManager(base.Manager):
     """Manager Class for the Projection Model"""
+
+    def __init__(self, model: base.Model, screen: pygame.Surface, controller: Controller):
+        # Delegate super init
+        super().__init__(model, screen)
+
+        # Reference controller
+        self.controller = controller
 
     def update(self, events, keyboard):
         """UP/DOWN arrowkeys change order, Holding LEFT/RIGHT change size"""
@@ -88,10 +105,36 @@ class ProjectionManager(base.Manager):
                 pass
 
         # Search for held keys
+        # Translation movement
         if keyboard[pygame.K_a]:
-            self.model.observer.origin.x -= 1
+            self.model.observer.origin.x -= self.controller.panSpeed
         if keyboard[pygame.K_d]:
-            self.model.observer.origin.x += 1
+            self.model.observer.origin.x += self.controller.panSpeed
+        if keyboard[pygame.K_w]:
+            self.model.observer.origin.y += self.controller.panSpeed
+        if keyboard[pygame.K_s]:
+            self.model.observer.origin.y -= self.controller.panSpeed
+
+        if keyboard[pygame.K_q]:
+            self.model.observer.origin.z -= self.controller.panSpeed
+        if keyboard[pygame.K_e]:
+            self.model.observer.origin.z += self.controller.panSpeed
+
+        # Rotation (units are degrees)
+        if keyboard[pygame.K_LEFT]:
+            self.model.observer.orientation.y += self.controller.rotateSpeed
+        if keyboard[pygame.K_RIGHT]:
+            self.model.observer.orientation.y -= self.controller.rotateSpeed
+
+        if keyboard[pygame.K_UP]:
+            self.model.observer.orientation.x += self.controller.rotateSpeed
+        if keyboard[pygame.K_DOWN]:
+            self.model.observer.orientation.x -= self.controller.rotateSpeed
+
+        if keyboard[pygame.K_COMMA]: # ,< key
+            self.model.observer.orientation.z -= self.controller.rotateSpeed
+        if keyboard[pygame.K_PERIOD]: # .> key
+            self.model.observer.orientation.z += self.controller.rotateSpeed
 
         # Refresh the display
         image = self.model.visual()

@@ -3,7 +3,6 @@
 import logging
 import pygame
 
-import stargon
 import projection
 from config import config
 
@@ -33,9 +32,9 @@ def main():
 
     # Create and populate model
     model = projection.Projection(projection.Observer(
-        origin=pygame.Vector3(0, 0, -200),
-        perspective=pygame.Vector3(0, 0, 0),
-        focal=75, window=(400, 400)
+        origin=pygame.Vector3(0, 0, -400),
+        orientation=pygame.Vector3(0, 0, 0),
+        focal=75, window=config["screen"]["dimensions"]
     ))
 
     # Variable for radius of cube
@@ -57,7 +56,9 @@ def main():
     model.add_line(pygame.Vector3(-cube, cube, cube), pygame.Vector3(cube, cube, cube))
 
     # Create Manager
-    manager = projection.ProjectionManager(model, screen)
+    manager = projection.ProjectionManager(
+        model, screen, projection.Controller(5, 2)
+    )
 
     # Create a Stargon Manager
     #manager = stargon.StargonManager(stargon.Stargon(200, 9), screen)
