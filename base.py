@@ -77,7 +77,7 @@ class Point:
         """Multiplies each component by a scalar
             (x, y) * c => (x*c, y*c)
         """
-        return Point(-self.position[0] * other, self.position[1] * other)
+        return Point(self.position[0] * other, self.position[1] * other)
 
     def __rmul__(self, other: float):
         return self.__mul__(other)
@@ -86,7 +86,7 @@ class Point:
         """Divides each component by a scalar
             (x, y) / c => (x/c, y/c)
         """
-        return Point(-self.position[0] / other, self.position[1] / other)
+        return Point(self.position[0] / other, self.position[1] / other)
 
     def __rtruediv__(self, other: float):
         return self.__truediv__(other)
@@ -112,7 +112,7 @@ class Panel:
         """Converts a theoretical Point into the position to be drawn on the pygame Surface\n
             Based on Panel origin and orientation
         """
-        return self.origin + Point(point.x * self.orientation.x, point.y * self.orientation.y)
+        return self.origin + Point(point[0] * self.orientation.x, point[1] * self.orientation.y)
 
     def clear(self, color: pygame.Color = pygame.Color(0, 0, 0)):
         """Clears the Panel to a specified blank color"""

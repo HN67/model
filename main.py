@@ -4,6 +4,7 @@ import logging
 import pygame
 
 import stargon
+import projection
 from config import config
 
 # Setup logger
@@ -26,10 +27,43 @@ def main():
     # Set the background color
     screen.fill(config["screen"]["color"])
 
+    # Create model and manager
+    # This portion of code is modified to implement different managers
+    # The event loop expects a base.Manager named `manager`
+
+    # Create and populate model
+    model = projection.Projection(projection.Observer(
+        origin=pygame.Vector3(0, 0, -200),
+        perspective=pygame.Vector3(0, 0, 0),
+        focal=75, window=(400, 400)
+    ))
+
+    # Variable for radius of cube
+    cube = 100
+
+    model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, -cube, cube))
+    model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(-cube, cube, cube))
+    model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, -cube, cube))
+    model.add_line(pygame.Vector3(cube, cube, -cube), pygame.Vector3(cube, cube, cube))
+
+    model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, cube, -cube))
+    model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(-cube, cube, cube))
+    model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, cube, -cube))
+    model.add_line(pygame.Vector3(cube, -cube, cube), pygame.Vector3(cube, cube, cube))
+
+    model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(cube, -cube, -cube))
+    model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(cube, -cube, cube))
+    model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(cube, cube, -cube))
+    model.add_line(pygame.Vector3(-cube, cube, cube), pygame.Vector3(cube, cube, cube))
+
+    # Create Manager
+    manager = projection.ProjectionManager(model, screen)
+
     # Create a Stargon Manager
-    manager = stargon.StargonManager(stargon.Stargon(200, 9), screen)
+    #manager = stargon.StargonManager(stargon.Stargon(200, 9), screen)
 
     # Event loop
+    # Shouldnt need to be changed to implement different models
     running = True
     while running:
 
