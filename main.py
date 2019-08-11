@@ -34,26 +34,27 @@ def main():
     model = projection.Projection(projection.Observer(
         origin=pygame.Vector3(0, 0, -400),
         orientation=pygame.Vector3(0, 0, 0),
-        focal=75, window=config["screen"]["dimensions"]
+        focal=200, window=config["screen"]["dimensions"]
     ))
 
     # Variable for radius of cube
     cube = 100
 
-    model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, -cube, cube))
-    model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(-cube, cube, cube))
-    model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, -cube, cube))
-    model.add_line(pygame.Vector3(cube, cube, -cube), pygame.Vector3(cube, cube, cube))
+    # model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, -cube, cube))
+    # model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(-cube, cube, cube))
+    # model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, -cube, cube))
+    # model.add_line(pygame.Vector3(cube, cube, -cube), pygame.Vector3(cube, cube, cube))
 
-    model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, cube, -cube))
-    model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(-cube, cube, cube))
-    model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, cube, -cube))
-    model.add_line(pygame.Vector3(cube, -cube, cube), pygame.Vector3(cube, cube, cube))
+    # model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, cube, -cube))
+    # model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(-cube, cube, cube))
+    # model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, cube, -cube))
+    # model.add_line(pygame.Vector3(cube, -cube, cube), pygame.Vector3(cube, cube, cube))
 
-    model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(cube, -cube, -cube))
-    model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(cube, -cube, cube))
-    model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(cube, cube, -cube))
-    model.add_line(pygame.Vector3(-cube, cube, cube), pygame.Vector3(cube, cube, cube))
+    # model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(cube, -cube, -cube))
+    # model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(cube, -cube, cube))
+    # model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(cube, cube, -cube))
+    # model.add_line(pygame.Vector3(-cube, cube, cube), pygame.Vector3(cube, cube, cube))
+    model.add_cube(pygame.Vector3(0, 0, 0), cube)
 
     # Create Manager
     manager = projection.ProjectionManager(

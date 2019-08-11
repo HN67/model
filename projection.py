@@ -39,6 +39,26 @@ class Projection(base.Model):
         """Add line to the 3D space of the projection, stretching from start to end"""
         self.lines.append((start, end))
 
+    def add_cube(self, center: Vector3, radius: float):
+        """Draws a wire-frame cube with points <radius> away from <center>"""
+
+        # Iterate through the 3 dimensions
+        for dimension in range(3):
+            for first in (-radius, radius):
+                for second in (-radius, radius):
+                    # Create an empty list to represent the start vector...
+                    # TODO comment this and also maybe use a vector from the start
+                    start = pygame.Vector3(0, 0, 0)
+                    start[dimension] = -radius
+                    start[(dimension + 1)%3] = first
+                    start[(dimension + 2)%3] = second
+                    end = pygame.Vector3(start)
+                    end[dimension] = radius
+                    self.add_line(
+                        center + start,
+                        center + end
+                    )
+
     def visual(self) -> pygame.Surface:
 
         # Create blank surface for observation window
@@ -106,19 +126,31 @@ class ProjectionManager(base.Manager):
 
         # Search for held keys
         # Translation movement
+        # Create base movement vector
+        movement = pygame.Vector3(0, 0, 0)
+        # Change movement vector based on held keys
         if keyboard[pygame.K_a]:
-            self.model.observer.origin.x -= self.controller.panSpeed
+            movement.x -= self.controller.panSpeed
         if keyboard[pygame.K_d]:
-            self.model.observer.origin.x += self.controller.panSpeed
+            movement.x += self.controller.panSpeed
         if keyboard[pygame.K_w]:
-            self.model.observer.origin.y += self.controller.panSpeed
+            movement.y += self.controller.panSpeed
         if keyboard[pygame.K_s]:
-            self.model.observer.origin.y -= self.controller.panSpeed
-
+            movement.y -= self.controller.panSpeed
         if keyboard[pygame.K_q]:
-            self.model.observer.origin.z -= self.controller.panSpeed
+            movement.z -= self.controller.panSpeed
         if keyboard[pygame.K_e]:
-            self.model.observer.origin.z += self.controller.panSpeed
+            movement.z += self.controller.panSpeed
+
+        # Rotate movement vector based on current orientation
+        # Countercompensates by counterclockwise so that
+        # eg D always moves right from camera perspective
+        movement.rotate_x_ip(-self.model.observer.orientation.x)
+        movement.rotate_y_ip(-self.model.observer.orientation.y)
+        movement.rotate_z_ip(-self.model.observer.orientation.z)
+
+        # Apply movement vector
+        self.model.observer.origin += movement
 
         # Rotation (units are degrees)
         if keyboard[pygame.K_LEFT]:
