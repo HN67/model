@@ -40,21 +40,9 @@ def main():
     # Variable for radius of cube
     cube = 100
 
-    # model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, -cube, cube))
-    # model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(-cube, cube, cube))
-    # model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, -cube, cube))
-    # model.add_line(pygame.Vector3(cube, cube, -cube), pygame.Vector3(cube, cube, cube))
-
-    # model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(-cube, cube, -cube))
-    # model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(-cube, cube, cube))
-    # model.add_line(pygame.Vector3(cube, -cube, -cube), pygame.Vector3(cube, cube, -cube))
-    # model.add_line(pygame.Vector3(cube, -cube, cube), pygame.Vector3(cube, cube, cube))
-
-    # model.add_line(pygame.Vector3(-cube, -cube, -cube), pygame.Vector3(cube, -cube, -cube))
-    # model.add_line(pygame.Vector3(-cube, -cube, cube), pygame.Vector3(cube, -cube, cube))
-    # model.add_line(pygame.Vector3(-cube, cube, -cube), pygame.Vector3(cube, cube, -cube))
-    # model.add_line(pygame.Vector3(-cube, cube, cube), pygame.Vector3(cube, cube, cube))
     model.add_cube(pygame.Vector3(0, 0, 0), cube)
+    #model.add_cube(pygame.Vector3(cube*2, 0, 0), cube)
+    #model.add_cube(pygame.Vector3(0, cube*2, 0), cube)
 
     # Create Manager
     manager = projection.ProjectionManager(

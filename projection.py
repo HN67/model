@@ -41,19 +41,25 @@ class Projection(base.Model):
 
     def add_cube(self, center: Vector3, radius: float):
         """Draws a wire-frame cube with points <radius> away from <center>"""
-
+        # Draws 3 sets of 4 lines, where each set is a different dimension
+        # Each set has the negative of that dimension to the positive
+        # And the 4 lines are iteration of -1, -1 -> 1, 1 (sorta binary)
         # Iterate through the 3 dimensions
         for dimension in range(3):
+            # Iterate through -1/-1, -1/1, 1/-1, 1/1 for non base dimensions
             for first in (-radius, radius):
                 for second in (-radius, radius):
-                    # Create an empty list to represent the start vector...
-                    # TODO comment this and also maybe use a vector from the start
+                    # Init base vector
                     start = pygame.Vector3(0, 0, 0)
+                    # Start on negative of the main dimension
                     start[dimension] = -radius
+                    # Fill the other two dimensions
                     start[(dimension + 1)%3] = first
                     start[(dimension + 2)%3] = second
+                    # Duplicate start to end but change the main dimension
                     end = pygame.Vector3(start)
                     end[dimension] = radius
+                    # Add the line
                     self.add_line(
                         center + start,
                         center + end
@@ -85,8 +91,8 @@ class Projection(base.Model):
             end.rotate_y_ip(self.observer.orientation.y)
             end.rotate_z_ip(self.observer.orientation.z)
 
-            # Dont draw lines behind focal?
-            if start.z > self.observer.focal and end.z > self.observer.focal:
+            # Dont draw lines behind camera? Old was focal: self.observer.focal
+            if start.z > 0 and end.z > 0:
 
                 # Project each point onto the 2D focal plane
                 start = pygame.Vector2(
@@ -152,24 +158,43 @@ class ProjectionManager(base.Manager):
         # Apply movement vector
         self.model.observer.origin += movement
 
+        # Create base rotation vector
+        rotation = pygame.Vector3(0, 0, 0)
+
         # Rotation (units are degrees)
         if keyboard[pygame.K_LEFT]:
-            self.model.observer.orientation.y += self.controller.rotateSpeed
+            rotation.y += self.controller.rotateSpeed
         if keyboard[pygame.K_RIGHT]:
-            self.model.observer.orientation.y -= self.controller.rotateSpeed
+            rotation.y -= self.controller.rotateSpeed
 
         if keyboard[pygame.K_UP]:
-            self.model.observer.orientation.x += self.controller.rotateSpeed
+            rotation.x += self.controller.rotateSpeed
         if keyboard[pygame.K_DOWN]:
-            self.model.observer.orientation.x -= self.controller.rotateSpeed
+            rotation.x -= self.controller.rotateSpeed
 
         if keyboard[pygame.K_COMMA]: # ,< key
-            self.model.observer.orientation.z -= self.controller.rotateSpeed
+            rotation.z -= self.controller.rotateSpeed
         if keyboard[pygame.K_PERIOD]: # .> key
-            self.model.observer.orientation.z += self.controller.rotateSpeed
+            rotation.z += self.controller.rotateSpeed
+
+        # Relatavize rotation
+        # TODO
+        
+
+        # Add the rotation temp vector
+        self.model.observer.orientation += rotation
 
         # Refresh the display
         image = self.model.visual()
+        
+        # Temporary debug information
+        font = pygame.font.SysFont("default", 30)
+        text = font.render(
+            f"{self.model.observer.origin}, {self.model.observer.orientation}",
+            True, (255, 255, 255), (0, 0, 0)
+        )
+        image.surface.blit(text, (0, 0))
+
         # Draw the image (to 0, 0 for now)
         image.display(self.screen, (0, 0))
     
