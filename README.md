@@ -9,4 +9,25 @@ Also, usually the base.Manager class is subclassed to hook the Model to Pygame d
 An example implementation is the ```stargon``` module, which draws pointed stars. The implementation currently hooked to main is ```projection```, which projects a 3D environment onto the screen.
 
 ## Projection
-Control movement with WASDQE, and rotate with arrow keys and >< keys.
+
+| Dependencies |
+|--------------|
+| [pygame](https://www.pygame.org/wiki/GettingStarted) |
+| [pyquaternion](http://kieranwynn.github.io/pyquaternion/) |
+
+### Controls
+
+Key | Action
+-------|----
+W | Pan Up
+A | Pan Left
+S | Pan Down
+D | Pan Right
+Q | Pan Out
+E | Pan In
+↑ | Look Up
+← | Look Left
+→ | Look Right
+↓ | Look Down
+< | Tilt Left
+> | Tilt Right
