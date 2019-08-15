@@ -30,4 +30,4 @@ E | Pan In
 → | Look Right
 ↓ | Look Down
 < | Tilt Left
-> | Tilt Right
+\> | Tilt Right
