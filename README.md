@@ -7,3 +7,6 @@ Implementation of a model is done by subclassing the base.Model class with a con
 Also, usually the base.Manager class is subclassed to hook the Model to Pygame display and events to show output and allow interactivity.
 
 An example implementation is the ```stargon``` module, which draws pointed stars. The implementation currently hooked to main is ```projection```, which projects a 3D environment onto the screen.
+
+## Projection
+Control movement with WASDQE, and rotate with arrow keys and >< keys.
