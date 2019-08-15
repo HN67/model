@@ -1,18 +1,47 @@
 """Implementation of a Model representing a 3D environment viewed through a perspective camera"""
 
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 import pygame
 from pygame import Vector3
 
+from pyquaternion import Quaternion
+
 import base
+
+class Rotation:
+    """Represents a 3D rotation based on axis and angle
+        Implemented using a quaternion
+    """
+
+    def __init__(self, axis: Vector3, angle: float) -> Rotation:
+        try:
+            # Regular based on axis/angle
+            self.quaternion = Quaternion(axis=axis, angle=angle)
+        except ZeroDivisionError:
+            # Null rotation when no axis ([0, 0, 0]) provided
+            self.quaternion = Quaternion()
+
+    def compose(self, rotation: Rotation) -> None:
+        """Returns the composition of the two rotations"""
+        self.quaternion *= rotation.quaternion
+
+    def rotate(self, vector: Vector3) -> Vector3:
+        """Returns a rotated version of the given vector based on this Rotation"""
+        return Vector3(*self.quaternion.rotate(vector))
+
+    def __neg__(self) -> Rotation:
+        """Returns the negative of this Rotation, around same axis but different direction"""
+        return Rotation(self.quaternion.axis, -self.quaternion.angle)
 
 @dataclass
 class Observer:
     """Class containing data about an observer in 3D space"""
 
     origin: Vector3
-    orientation: Vector3
+    orientation: Rotation
 
     focal: float
     window: base.Point
@@ -20,7 +49,6 @@ class Observer:
 @dataclass
 class Controller:
     """Class containing data about the controls of the Projection"""
-
     panSpeed: float
     rotateSpeed: float
 
@@ -83,13 +111,9 @@ class Projection(base.Model):
             end = end - self.observer.origin
 
             # Rotate each vector point
-            start.rotate_x_ip(self.observer.orientation.x)
-            start.rotate_y_ip(self.observer.orientation.y)
-            start.rotate_z_ip(self.observer.orientation.z)
+            start = self.observer.orientation.rotate(start)
 
-            end.rotate_x_ip(self.observer.orientation.x)
-            end.rotate_y_ip(self.observer.orientation.y)
-            end.rotate_z_ip(self.observer.orientation.z)
+            end = self.observer.orientation.rotate(end)
 
             # Dont draw lines behind camera? Old was focal: self.observer.focal
             if start.z > 0 and end.z > 0:
@@ -151,49 +175,51 @@ class ProjectionManager(base.Manager):
         # Rotate movement vector based on current orientation
         # Countercompensates by counterclockwise so that
         # eg D always moves right from camera perspective
-        movement.rotate_x_ip(-self.model.observer.orientation.x)
-        movement.rotate_y_ip(-self.model.observer.orientation.y)
-        movement.rotate_z_ip(-self.model.observer.orientation.z)
+        movement = (-self.model.observer.orientation).rotate(movement)
 
         # Apply movement vector
         self.model.observer.origin += movement
 
-        # Create base rotation vector
-        rotation = pygame.Vector3(0, 0, 0)
+        # Determine axis
+        axis = pygame.Vector3(0, 0, 0)
 
         # Rotation (units are degrees)
         if keyboard[pygame.K_LEFT]:
-            rotation.y += self.controller.rotateSpeed
+            axis.y += 1
         if keyboard[pygame.K_RIGHT]:
-            rotation.y -= self.controller.rotateSpeed
+            axis.y -= 1
 
         if keyboard[pygame.K_UP]:
-            rotation.x += self.controller.rotateSpeed
+            axis.x += 1
         if keyboard[pygame.K_DOWN]:
-            rotation.x -= self.controller.rotateSpeed
+            axis.x -= 1
 
         if keyboard[pygame.K_COMMA]: # ,< key
-            rotation.z -= self.controller.rotateSpeed
+            axis.z -= 1
         if keyboard[pygame.K_PERIOD]: # .> key
-            rotation.z += self.controller.rotateSpeed
+            axis.z += 1
 
-        # Relatavize rotation
-        # TODO
-        
+        # Relativize axis based on current rotation
+        axis = (-self.model.observer.orientation).rotate(axis)
 
-        # Add the rotation temp vector
-        self.model.observer.orientation += rotation
+        # Create change rotation
+        rotation = Rotation(axis, self.controller.rotateSpeed)
+
+        # Compose the new rotation on the the main
+        self.model.observer.orientation.compose(rotation)
 
         # Refresh the display
         image = self.model.visual()
-        
+
         # Temporary debug information
-        font = pygame.font.SysFont("default", 30)
-        text = font.render(
-            f"{self.model.observer.origin}, {self.model.observer.orientation}",
-            True, (255, 255, 255), (0, 0, 0)
-        )
-        image.surface.blit(text, (0, 0))
+        # font = pygame.font.SysFont("default", 30)
+        # text = font.render(
+        #     f"{self.model.observer.origin}|"
+        #     +f"{self.model.observer.orientation.quaternion.axis},"
+        #     +f"{self.model.observer.orientation.quaternion.angle}",
+        #     True, (255, 255, 255), (0, 0, 0)
+        # )
+        # image.surface.blit(text, (0, 0))
 
         # Draw the image (to 0, 0 for now)
         image.display(self.screen, (0, 0))

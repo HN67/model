@@ -1,6 +1,7 @@
 """Main script"""
 
 import logging
+import math
 import pygame
 
 import projection
@@ -33,7 +34,7 @@ def main():
     # Create and populate model
     model = projection.Projection(projection.Observer(
         origin=pygame.Vector3(0, 0, -400),
-        orientation=pygame.Vector3(0, 0, 0),
+        orientation=projection.Rotation(pygame.Vector3(0, 0, 1), 0),
         focal=200, window=config["screen"]["dimensions"]
     ))
 
@@ -46,7 +47,7 @@ def main():
 
     # Create Manager
     manager = projection.ProjectionManager(
-        model, screen, projection.Controller(5, 2)
+        model, screen, projection.Controller(5, math.pi/90)
     )
 
     # Create a Stargon Manager
