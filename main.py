@@ -33,9 +33,9 @@ def main():
 
     # Create and populate model
     model = projection.Projection(projection.Observer(
-        origin=pygame.Vector3(0, 0, -400),
-        orientation=projection.Rotation(pygame.Vector3(0, 0, 1), 0),
-        focal=200, window=config["screen"]["dimensions"]
+        origin=pygame.Vector3(0, 0, -config["screen"]["focal"]*2),
+        orientation=projection.Rotation(pygame.Vector3(0, 0, 0), 0),
+        focal=config["screen"]["focal"], window=config["screen"]["dimensions"]
     ))
 
     # Variable for radius of cube
@@ -47,7 +47,7 @@ def main():
 
     # Create Manager
     manager = projection.ProjectionManager(
-        model, screen, projection.Controller(5, math.pi/90)
+        model, screen, projection.Controller(config["ui"]["panSpeed"], config["ui"]["rotateSpeed"])
     )
 
     # Create a Stargon Manager
