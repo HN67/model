@@ -1,0 +1,9 @@
+[Master]
+
+# Allow these C extensions to be loaded
+extension-pkg-whitelist=pygame
+
+[Messages Control]
+
+# Disable certain rules
+disable=invalid-name
