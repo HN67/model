@@ -63,9 +63,16 @@ class Projection(base.Model):
         # Initalize set of lines belonging to the space
         self.lines = []
 
+        # Initilize list of triangles
+        self.triangles = []
+
     def add_line(self, start: Vector3, end: Vector3):
         """Add line to the 3D space of the projection, stretching from start to end"""
         self.lines.append((start, end))
+
+    def add_triangle(self, first: Vector3, second: Vector3, third: Vector3):
+        """Adds a triangle to the Model, with the given points"""
+        self.triangles.append((first, second, third))
 
     def add_cube(self, center: Vector3, radius: float):
         """Draws a wire-frame cube with points <radius> away from <center>"""
@@ -93,6 +100,26 @@ class Projection(base.Model):
                         center + end
                     )
 
+    def projected(self, point: Vector3) -> pygame.Vector2:
+        """Returns a point in the Model projected onto the viewpoint based on the observer
+        Returns None if the point does not project onto the viewpoint
+        """
+        # Relativize translation
+        point = point - self.observer.origin
+        # Rotate based on relative orientation
+        point = self.observer.orientation.rotate(point)
+        # Check if point projects
+        if point.z > 0:
+            # Project onto viewport
+            point = pygame.Vector2(
+                self.observer.focal/point.z * point.x,
+                self.observer.focal/point.z * point.y
+            )
+            # Return projected point
+            return point
+        else:
+            return None
+
     def visual(self) -> pygame.Surface:
 
         # Create blank surface for observation window
@@ -105,31 +132,25 @@ class Projection(base.Model):
         # Draw every line projected
         for start, end in self.lines:
 
-            # Transform the endpoints
-            # Translate relative to observer position
-            start = start - self.observer.origin
-            end = end - self.observer.origin
+            # Project points
+            start = self.projected(start)
+            end = self.projected(end)
 
-            # Rotate each vector point
-            start = self.observer.orientation.rotate(start)
-
-            end = self.observer.orientation.rotate(end)
-
-            # Dont draw lines behind camera? Old was focal: self.observer.focal
-            if start.z > 0 and end.z > 0:
-
-                # Project each point onto the 2D focal plane
-                start = pygame.Vector2(
-                    self.observer.focal/start.z * start.x,
-                    self.observer.focal/start.z * start.y
-                )
-                end = pygame.Vector2(
-                    self.observer.focal/end.z * end.x,
-                    self.observer.focal/end.z * end.y
-                )
-
-                # Draw the projected line onto the 2D output
+            # Draw the projected line if it exists
+            if start and end:
                 output.draw_line(start, end)
+
+        # Project and draw triangles
+        for first, second, third in self.triangles:
+
+            # Project points
+            first = self.projected(first)
+            second = self.projected(second)
+            third = self.projected(third)
+
+            # Draw projected triangle if there are no issues
+            if first and second and third:
+                output.draw_polygon((first, second, third))
 
         # Return the finished output
         return output
@@ -188,12 +209,10 @@ class ProjectionManager(base.Manager):
             axis.y += 1
         if keyboard[pygame.K_RIGHT]:
             axis.y -= 1
-
         if keyboard[pygame.K_UP]:
             axis.x += 1
         if keyboard[pygame.K_DOWN]:
             axis.x -= 1
-
         if keyboard[pygame.K_COMMA]: # ,< key
             axis.z -= 1
         if keyboard[pygame.K_PERIOD]: # .> key
@@ -212,14 +231,14 @@ class ProjectionManager(base.Manager):
         image = self.model.visual()
 
         # Temporary debug information
-        # font = pygame.font.SysFont("default", 30)
-        # text = font.render(
-        #     f"{self.model.observer.origin}|"
-        #     +f"{self.model.observer.orientation.quaternion.axis},"
-        #     +f"{self.model.observer.orientation.quaternion.angle}",
-        #     True, (255, 255, 255), (0, 0, 0)
-        # )
-        # image.surface.blit(text, (0, 0))
+        # Convert to readable strings
+        pos = self.model.observer.origin
+        position = f"({pos.x:.1f}, {pos.y:.1f}, {pos.z:.1f})"
+
+        # Create and display text
+        font = pygame.font.SysFont("default", 30)
+        text = font.render(position, True, (255, 255, 255), (0, 0, 0))
+        image.surface.blit(text, (0, 0))
 
         # Draw the image (to 0, 0 for now)
         image.display(self.screen, (0, 0))

@@ -44,6 +44,11 @@ def main():
     model.add_cube(pygame.Vector3(0, 0, 0), cube)
     #model.add_cube(pygame.Vector3(cube*2, 0, 0), cube)
     #model.add_cube(pygame.Vector3(0, cube*2, 0), cube)
+    model.add_triangle(
+        pygame.Vector3(0, 0, 0),
+        pygame.Vector3(cube, cube, cube),
+        pygame.Vector3(-cube, cube, cube)
+    )
 
     # Create Manager
     manager = projection.ProjectionManager(
