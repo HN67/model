@@ -126,6 +126,17 @@ class Panel:
             self.convert(start).position, self.convert(end).position
         )
 
+    def draw_polygon(self, points: typing.List[Point],
+                     color: pygame.Color = pygame.Color(127, 127, 127),
+                     borderWidth: float = 1, borderColor: pygame.Color = (255, 255, 255)):
+        """Draws a (usually) filled polygon onto the Panel surface"""
+        # Convert points
+        points = [self.convert(point).position for point in points]
+        # Draw filled polygon
+        pygame.draw.polygon(self.surface, color, points)
+        # Draw border polygon
+        pygame.draw.polygon(self.surface, borderColor, points, borderWidth)
+
     def display(self, surface: pygame.Surface, position: typing.Tuple[int, int]):
         """Displays the panel on a surface by blitting it"""
         surface.blit(self.surface, position)
