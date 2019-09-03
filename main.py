@@ -1,7 +1,6 @@
 """Main script"""
 
 import logging
-import math
 import pygame
 
 import projection
@@ -41,13 +40,25 @@ def main():
     # Variable for radius of cube
     cube = 100
 
-    model.add_cube(pygame.Vector3(0, 0, 0), cube)
+    model.add_wire_cube(pygame.Vector3(0, 0, 0), cube)
+    model.add_wire_cube(pygame.Vector3(cube*4, 0, 0), cube)
+    model.add_wire_cube(pygame.Vector3(0, cube*4, 0), cube)
+    model.add_wire_cube(pygame.Vector3(cube*4, cube*4, 0), cube)
     #model.add_cube(pygame.Vector3(cube*2, 0, 0), cube)
     #model.add_cube(pygame.Vector3(0, cube*2, 0), cube)
-    model.add_triangle(
+    model.add_polygon(
         pygame.Vector3(0, 0, 0),
         pygame.Vector3(cube, cube, cube),
         pygame.Vector3(-cube, cube, cube)
+    )
+    model.add_polygon(
+        pygame.Vector3(0, 0, 0),
+        pygame.Vector3(0, 0, 0),
+        pygame.Vector3(cube, 0, 0)
+    )
+    model.add_polygon(
+        pygame.Vector3(0, 0, 0),
+        pygame.Vector3(-cube, 0, 0)
     )
 
     # Create Manager
@@ -93,6 +104,8 @@ def main():
 
             # Limit the speed of ticks
             clock.tick(config["app"]["tps"])
+
+            logging.info("FPS: %s", clock.get_fps())
 
 # Safeguard so that main code only runs if this file is directly run and not imported
 if __name__ == "__main__":

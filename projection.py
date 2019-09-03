@@ -60,21 +60,17 @@ class Projection(base.Model):
         # Reference observer
         self.observer = observer
 
-        # Initalize set of lines belonging to the space
-        self.lines = []
+        # Initialize list of polygons
+        self.polygons = []
 
-        # Initilize list of triangles
-        self.triangles = []
+    def add_polygon(self, *points: Vector3) -> None:
+        """Adds a filled 3D polygon to the Model
+        Care should be used creating bent high-order polygons, depth may not be properly shown
+        Also can be used for lines
+        """
+        self.polygons.append(points)
 
-    def add_line(self, start: Vector3, end: Vector3):
-        """Add line to the 3D space of the projection, stretching from start to end"""
-        self.lines.append((start, end))
-
-    def add_triangle(self, first: Vector3, second: Vector3, third: Vector3):
-        """Adds a triangle to the Model, with the given points"""
-        self.triangles.append((first, second, third))
-
-    def add_cube(self, center: Vector3, radius: float):
+    def add_wire_cube(self, center: Vector3, radius: float):
         """Draws a wire-frame cube with points <radius> away from <center>"""
         # Draws 3 sets of 4 lines, where each set is a different dimension
         # Each set has the negative of that dimension to the positive
@@ -95,19 +91,27 @@ class Projection(base.Model):
                     end = pygame.Vector3(start)
                     end[dimension] = radius
                     # Add the line
-                    self.add_line(
+                    self.add_polygon(
                         center + start,
                         center + end
                     )
 
-    def projected(self, point: Vector3) -> pygame.Vector2:
-        """Returns a point in the Model projected onto the viewpoint based on the observer
-        Returns None if the point does not project onto the viewpoint
+    def add_cube(self, center: Vector3, radius: float):
+        """Draws a solid-face cube with points <radius> away from <center>"""
+        raise NotImplementedError("Not implemented yet")
+
+    def transformed(self, point: Vector3) -> pygame.Vector3:
+        """Returns a point transformed to relative coordinates based on Model observer
+        Rotates so that the observer faces into the positive z-axis
         """
-        # Relativize translation
-        point = point - self.observer.origin
-        # Rotate based on relative orientation
-        point = self.observer.orientation.rotate(point)
+        # Translate and then rotate the point
+        return self.observer.orientation.rotate(point - self.observer.origin)
+
+    def projected(self, point: Vector3) -> pygame.Vector2:
+        """Returns a point  projected onto the viewpoint based on the observer
+        Returns None if the point does not project onto the viewpoint
+        Does not transform the point first
+        """
         # Check if point projects
         if point.z > 0:
             # Project onto viewport
@@ -118,6 +122,7 @@ class Projection(base.Model):
             # Return projected point
             return point
         else:
+            # Point is not in front of observer, so not projected
             return None
 
     def visual(self) -> pygame.Surface:
@@ -129,28 +134,20 @@ class Projection(base.Model):
             orientation=(1, -1)
         )
 
-        # Draw every line projected
-        for start, end in self.lines:
+        # TODO develop depth layering and maybe export the draw functions to help achieve this
 
-            # Project points
-            start = self.projected(start)
-            end = self.projected(end)
+        # Draw each polygon
+        for points in self.polygons:
 
-            # Draw the projected line if it exists
-            if start and end:
-                output.draw_line(start, end)
+            # Project point
+            points = [self.projected(self.transformed(point)) for point in points]
 
-        # Project and draw triangles
-        for first, second, third in self.triangles:
-
-            # Project points
-            first = self.projected(first)
-            second = self.projected(second)
-            third = self.projected(third)
-
-            # Draw projected triangle if there are no issues
-            if first and second and third:
-                output.draw_polygon((first, second, third))
+            # Draw if no issues
+            if not None in points:
+                try:
+                    output.draw_polygon(points)
+                except ValueError:
+                    output.draw_line(*points)
 
         # Return the finished output
         return output
@@ -233,7 +230,7 @@ class ProjectionManager(base.Manager):
         # Temporary debug information
         # Convert to readable strings
         pos = self.model.observer.origin
-        position = f"({pos.x:.1f}, {pos.y:.1f}, {pos.z:.1f})"
+        position = f"<{pos.x:.1f}, {pos.y:.1f}, {pos.z:.1f}>"
 
         # Create and display text
         font = pygame.font.SysFont("default", 30)
