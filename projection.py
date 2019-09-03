@@ -134,20 +134,24 @@ class Projection(base.Model):
             orientation=(1, -1)
         )
 
-        # TODO develop depth layering and maybe export the draw functions to help achieve this
+        # Transform the polygons based on observer
+        polygons = [tuple(self.transformed(point) for point in polygon) for polygon in self.polygons]
+
+        # Sort the polygons by depth
+        polygons = sorted(polygons, key=lambda polygon: polygon[0].z, reverse=True)
 
         # Draw each polygon
-        for points in self.polygons:
+        for polygon in polygons:
 
             # Project point
-            points = [self.projected(self.transformed(point)) for point in points]
+            polygon = [self.projected(point) for point in polygon]
 
             # Draw if no issues
-            if not None in points:
+            if not None in polygon:
                 try:
-                    output.draw_polygon(points)
+                    output.draw_polygon(polygon)
                 except ValueError:
-                    output.draw_line(*points)
+                    output.draw_line(*polygon)
 
         # Return the finished output
         return output
