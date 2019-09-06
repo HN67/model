@@ -135,9 +135,14 @@ class Projection(base.Model):
         )
 
         # Transform the polygons based on observer
-        polygons = [tuple(self.transformed(point) for point in polygon) for polygon in self.polygons]
+        polygons = [
+            tuple(self.transformed(point) for point in polygon)
+            for polygon in self.polygons
+        ]
 
         # Sort the polygons by depth
+        # TODO use a more intelligent sorting method than a random point depth
+        # should determine closest point or something
         polygons = sorted(polygons, key=lambda polygon: polygon[0].z, reverse=True)
 
         # Draw each polygon

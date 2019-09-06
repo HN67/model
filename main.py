@@ -6,9 +6,12 @@ import pygame
 import projection
 from config import config
 
-# Setup logger
+# Set global logging level
+logging.getLogger().setLevel(config["logging"]["level"])
+
+# Setup __main__ logger
 logger = logging.getLogger(__name__)
-logger.setLevel(config["logging"]["level"])
+logger.addHandler(logging.StreamHandler())
 
 def main():
     """Main function to start the script"""
@@ -105,7 +108,7 @@ def main():
             # Limit the speed of ticks
             clock.tick(config["app"]["tps"])
 
-            logging.info("FPS: %s", clock.get_fps())
+            logger.info("FPS: %s", clock.get_fps())
 
 # Safeguard so that main code only runs if this file is directly run and not imported
 if __name__ == "__main__":
