@@ -64,6 +64,17 @@ def main():
         pygame.Vector3(-cube, 0, 0)
     )
 
+    model.add_polygon(
+        pygame.Vector3(0, 0, 0),
+        pygame.Vector3(cube, 0, cube),
+        pygame.Vector3(0, 3*cube, 0),
+    )
+    model.add_polygon(
+        pygame.Vector3(-cube, 0, -cube),
+        pygame.Vector3(cube, 0, 2*cube),
+        pygame.Vector3(-cube, 3*cube, -cube),
+    )
+
     # Create Manager
     manager = projection.ProjectionManager(
         model, screen, projection.Controller(config["ui"]["panSpeed"], config["ui"]["rotateSpeed"])

@@ -143,7 +143,12 @@ class Projection(base.Model):
         # Sort the polygons by depth
         # TODO use a more intelligent sorting method than a random point depth
         # should determine closest point or something
-        polygons = sorted(polygons, key=lambda polygon: polygon[0].z, reverse=True)
+        polygons = sorted(
+            polygons,
+            # Sort by the distance to the closest point of the polygon
+            key=lambda polygon: sorted(polygon, key=lambda point: point.z)[0].z,
+            reverse=True
+        )
 
         # Draw each polygon
         for polygon in polygons:
